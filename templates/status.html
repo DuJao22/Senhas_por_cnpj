@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Status do Banco - Sistema de Análise de Procedimentos{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header da página -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Status do Banco de Dados</h2>
+        <p class="text-gray-600">Informações sobre o banco <code class="bg-gray-100 px-2 py-1 rounded">savi_dados_unificado.db</code></p>
+    </div>
+
+    <!-- Erro do sistema -->
+    {% if info.erro %}
+        <div class="bg-red-50 border-l-4 border-red-500 p-6 mb-8 rounded-r-lg">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-lg font-medium text-red-800">Erro</h3>
+                    <p class="text-red-700 mt-1">{{ info.erro }}</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Status Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Status do Banco -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-800">💾 Banco de Dados</h3>
+                {% if info.banco_existe %}
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Encontrado</span>
+                {% else %}
+                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">Não Encontrado</span>
+                {% endif %}
+            </div>
+            <div class="space-y-2">
+                <div class="text-sm">
+                    <span class="text-gray-600">Caminho:</span>
+                    <code class="bg-gray-100 px-2 py-1 rounded text-xs ml-2">{{ info.caminho_banco }}</code>
+                </div>
+                <div class="text-sm">
+                    <span class="text-gray-600">Status:</span>
+                    <span class="ml-2 {% if info.banco_existe %}text-green-600{% else %}text-red-600{% endif %}">
+                        {% if info.banco_existe %}✅ Arquivo existe{% else %}❌ Arquivo não encontrado{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status da Tabela -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-800">📋 Tabela Produção</h3>
+                {% if info.tabela_existe %}
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Encontrada</span>
+                {% else %}
+                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">Não Encontrada</span>
+                {% endif %}
+            </div>
+            <div class="space-y-2">
+                <div class="text-sm">
+                    <span class="text-gray-600">Nome:</span>
+                    <code class="bg-gray-100 px-2 py-1 rounded text-xs ml-2">producao</code>
+                </div>
+                <div class="text-sm">
+                    <span class="text-gray-600">Status:</span>
+                    <span class="ml-2 {% if info.tabela_existe %}text-green-600{% else %}text-red-600{% endif %}">
+                        {% if info.tabela_existe %}✅ Tabela existe{% else %}❌ Tabela não encontrada{% endif %}
+                    </span>
+                </div>
+                {% if info.tabela_existe %}
+                    <div class="text-sm">
+                        <span class="text-gray-600">Registros:</span>
+                        <span class="ml-2 font-bold text-blue-600">{{ info.total_registros }}</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Empresas Encontradas -->
+    {% if info.empresas_encontradas %}
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">🏢 Empresas Encontradas no Banco</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {% for empresa in info.empresas_encontradas %}
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                        <span class="text-sm font-medium text-blue-800">{{ empresa }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="mt-4 text-sm text-gray-600">
+                <strong>Total:</strong> {{ info.empresas_encontradas|length }} empresa(s) única(s) encontrada(s)
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Instruções -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-lg p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">📝 Instruções</h3>
+        <div class="space-y-3 text-sm text-gray-700">
+            {% if not info.banco_existe %}
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r">
+                    <p class="font-medium text-yellow-800">⚠️ Banco de dados não encontrado</p>
+                    <p class="text-yellow-700 mt-1">
+                        Certifique-se de que o arquivo <code>savi_dados_unificado.db</code> está no diretório raiz do projeto.
+                    </p>
+                </div>
+            {% elif not info.tabela_existe %}
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r">
+                    <p class="font-medium text-yellow-800">⚠️ Tabela 'producao' não encontrada</p>
+                    <p class="text-yellow-700 mt-1">
+                        O banco existe, mas não contém a tabela 'producao' necessária para a análise.
+                    </p>
+                </div>
+            {% else %}
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r">
+                    <p class="font-medium text-green-800">✅ Sistema pronto para análise</p>
+                    <p class="text-green-700 mt-1">
+                        Banco e tabela encontrados com {{ info.total_registros }} registros. 
+                        <a href="{{ url_for('relatorio_erros') }}" class="underline font-medium">Clique aqui para analisar os dados</a>.
+                    </p>
+                </div>
+            {% endif %}
+            
+            <div class="mt-4">
+                <p><strong>Estrutura esperada da tabela 'producao':</strong></p>
+                <ul class="list-disc list-inside mt-2 space-y-1 text-xs bg-gray-100 p-3 rounded">
+                    <li><code>usuario_nome</code> - Nome do paciente</li>
+                    <li><code>numero_guia</code> - Número da guia</li>
+                    <li><code>data_execucao</code> - Data de execução do procedimento</li>
+                    <li><code>empresa</code> - Nome da empresa/convênio</li>
+                    <li><code>procedimento_nome</code> - Nome do procedimento realizado</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
